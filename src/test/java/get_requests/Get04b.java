@@ -1,0 +1,66 @@
+package get_requests;
+
+import base_urls.HerOkuAppBaseUrl;
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+import org.junit.jupiter.api.Test;
+import org.testng.asserts.SoftAssert;
+
+import static io.restassured.RestAssured.given;
+
+public class Get04b extends HerOkuAppBaseUrl {
+/*
+        Given
+            https://restful-booker.herokuapp.com/booking/8065
+        When
+            User send a GET request to the URL
+        Then
+            HTTP Status Code should be 200
+        And
+            Response content type is “application/json”
+        And
+            Response body should be like;
+                     {
+                        "firstname": "John",
+                        "lastname": "Smith",
+                        "totalprice": 111,
+                        "depositpaid": true,
+                        "bookingdates": {
+                            "checkin": "2018-01-01",
+                            "checkout": "2019-01-01"
+                        },
+                        "additionalneeds": "Breakfast"
+                    }
+     */
+
+    @Test
+    public void get04() {
+
+        spec.pathParams("1", "booking", "2", 8065);
+
+        Response response = given().spec(spec).when().get("/{1}/{2}");
+        response.prettyPrint();
+
+        JsonPath jsonPath = response.jsonPath();
+
+        //Soft Assertion
+        //1st: Create SoftAssert Object
+        SoftAssert softAssert = new SoftAssert();
+
+        //2nd: Do Assertion
+        softAssert.assertEquals( response.statusCode(),200);
+        softAssert.assertEquals(response.contentType(),"application/json; charset=utf-8");
+        softAssert.assertEquals(jsonPath.getString("firstname"),"John");
+        softAssert.assertEquals(jsonPath.getString("lastname"),"Smith");
+        softAssert.assertEquals(jsonPath.getInt("totalprice"),111);
+        softAssert.assertEquals(jsonPath.getBoolean("depositpaid"),true);
+        softAssert.assertEquals(jsonPath.getString("additionalneeds"),"Breakfast");
+
+        softAssert.assertEquals(jsonPath.getString("bookingdates.checkin"),"2018-01-01");
+        softAssert.assertEquals(jsonPath.getString("bookingdates.checkout"),"2019-01-01");
+
+        //3rd: AssertAll
+        softAssert.assertAll();
+    }
+
+    }
